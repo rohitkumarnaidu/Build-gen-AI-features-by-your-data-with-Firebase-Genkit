@@ -18,14 +18,12 @@ import { genkit } from 'genkit';
 import { enableFirebaseTelemetry } from '@genkit-ai/firebase';
 import { vertexAI } from '@genkit-ai/vertexai';
 
-// Your web app's Firebase configuration
-const firebaseConfig = {
-  // ...
-  projectId: 'REPLACE_WITH_YOUR_PROJECT_ID',
-  // ...
-};
-
-export const getProjectId = () => firebaseConfig.projectId;
+// Resolve project ID dynamically from environment with fallback
+export const getProjectId = () =>
+  process.env.FIREBASE_PROJECT_ID ||
+  process.env.GCLOUD_PROJECT ||
+  process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID ||
+  'REPLACE_WITH_YOUR_PROJECT_ID';
 
 enableFirebaseTelemetry({ projectId: getProjectId() });
 
@@ -33,7 +31,7 @@ export const ai = genkit({
   plugins: [
     vertexAI({
       projectId: getProjectId(),
-      location: 'us-central1',
+      location: process.env.VERTEX_AI_LOCATION || 'us-central1',
     }),
   ],
 });
