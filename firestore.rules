@@ -2,19 +2,29 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Make sure to write security rules for your app before reusing codelab code
+    // Zero Trust Security Baseline: Default deny all unmapped documents
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Public read-only catalog data
     match /activities/{id} {
       allow read: if true;
+      allow write: if false;
     }
     match /places/{id} {
       allow read: if true;
+      allow write: if false;
     }
 
+    // Trace stores require authenticated identity (prevent quota exhaustion & spam)
     match /flowTraceStore/{id} {
-      allow create: if true;
+      allow create: if request.auth != null;
+      allow read, update, delete: if false;
     }
     match /traceStore/{id} {
-      allow create: if true;
+      allow create: if request.auth != null;
+      allow read, update, delete: if false;
     }
   }
 }
